@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voter Outreach Graphics Library</title>
+  <meta name="description" content="Download print-ready and social-media voting graphics for your state, and copy pre-written captions.">
+  <style>
+  #voting-resources-app, #voting-resources-app * {
+    box-sizing: border-box;
+  }
+  #voting-resources-app {
+    --background: #FFFFFF;
+    --foreground: #0C1927;
+    --card: #FFFFFF;
+    --primary: #1C416E;
+    --primary-foreground: #FFFFFF;
+    --secondary: #E6EAF4;
+    --muted: #EAEAE6;
+    --muted-foreground: #6B7280;
+    --accent: #C8102E;
+    --border: rgba(12, 25, 39, 0.12);
+    --radius: 2px;
+
+    background: var(--background);
+    color: var(--foreground);
+    font-family: 'DM Sans', sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+  }
+  #voting-resources-app img { display: block; max-width: 100%; }
+  #voting-resources-app button, #voting-resources-app select {
+    font-family: inherit;
+    border-radius: 0;
+    background: none;
+  }
+  #voting-resources-app .vra-container {
+    max-width: 64rem;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    width: 100%;
+  }
+  @media (min-width: 768px) {
+    #voting-resources-app .vra-container { padding: 0 2.5rem; }
+  }
+
+  /* Header */
+  #voting-resources-app .vra-header { background: var(--primary); color: var(--primary-foreground); }
+  #voting-resources-app .vra-header-inner { padding: 2.5rem 0; }
+  @media (min-width: 768px) { #voting-resources-app .vra-header-inner { padding: 3.5rem 0; } }
+  #voting-resources-app .vra-eyebrow {
+    font-family: 'Libre Franklin', sans-serif;
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.2em; color: rgba(255,255,255,0.5); margin: 0 0 0.75rem;
+  }
+  #voting-resources-app h1 {
+    font-family: 'Libre Franklin', sans-serif;
+    font-size: 1.875rem; font-weight: 700; letter-spacing: -0.02em;
+    line-height: 1.2; margin: 0 0 1.25rem;
+  }
+  @media (min-width: 768px) { #voting-resources-app h1 { font-size: 2.25rem; } }
+  @media (min-width: 1024px) { #voting-resources-app h1 { font-size: 3rem; } }
+  #voting-resources-app h1 br.vra-force-break { display: none; }
+  @media (min-width: 640px) { #voting-resources-app h1 br.vra-force-break { display: block; } }
+  #voting-resources-app .vra-header p {
+    color: rgba(255,255,255,0.75); max-width: 42rem; line-height: 1.6;
+    font-size: 0.875rem; margin: 0;
+  }
+  @media (min-width: 768px) { #voting-resources-app .vra-header p { font-size: 1rem; } }
+  #voting-resources-app .vra-accent-bar { height: 4px; background: var(--accent); }
+
+  /* State selector bar */
+  #voting-resources-app .vra-selector-bar {
+    background: var(--card); border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+  #voting-resources-app .vra-selector-inner {
+    padding: 1rem 0; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+  }
+  #voting-resources-app .vra-selector-label {
+    font-family: 'Libre Franklin', sans-serif;
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--muted-foreground); white-space: nowrap;
+  }
+  #voting-resources-app select#vra-state-select {
+    border: 1px solid var(--border); background-color: var(--background);
+    color: var(--foreground); font-size: 0.875rem; padding: 0.5rem 2rem 0.5rem 1rem;
+    cursor: pointer; min-width: 14rem; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+  }
+  #voting-resources-app select#vra-state-select:focus {
+    outline: none; box-shadow: 0 0 0 2px var(--primary);
+  }
+  #voting-resources-app .vra-count {
+    font-size: 0.75rem; color: var(--muted-foreground); margin-left: auto; display: none;
+  }
+  @media (min-width: 640px) { #voting-resources-app .vra-count.vra-visible { display: block; } }
+
+  /* Main */
+  #voting-resources-app main { flex: 1; padding: 2rem 0; }
+  @media (min-width: 768px) { #voting-resources-app main { padding: 3rem 0; } }
+
+  #voting-resources-app .vra-empty {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 7rem 0; text-align: center;
+  }
+  #voting-resources-app .vra-empty-icon {
+    width: 4rem; height: 4rem; border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;
+    color: var(--muted-foreground);
+  }
+  #voting-resources-app .vra-empty p.vra-empty-title {
+    font-family: 'Libre Franklin', sans-serif; font-size: 1rem; font-weight: 600;
+    margin: 0 0 0.25rem;
+  }
+  #voting-resources-app .vra-empty p.vra-empty-sub {
+    font-size: 0.875rem; color: var(--muted-foreground); max-width: 20rem; margin: 0;
+  }
+
+  #voting-resources-app .vra-section-header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;
+  }
+  #voting-resources-app .vra-section-header h2 {
+    font-family: 'Libre Franklin', sans-serif; font-size: 1.125rem; font-weight: 700; margin: 0;
+  }
+  #voting-resources-app .vra-section-header span {
+    font-size: 0.75rem; color: var(--muted-foreground); font-weight: 500; letter-spacing: 0.02em;
+  }
+
+  #voting-resources-app .vra-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;
+  }
+  @media (min-width: 768px) { #voting-resources-app .vra-grid { grid-template-columns: repeat(3, 1fr); gap: 1.25rem; } }
+
+  #voting-resources-app .vra-card {
+    background: var(--card); border: 1px solid var(--border);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  #voting-resources-app .vra-card-image { aspect-ratio: 1 / 1; background: var(--muted); overflow: hidden; }
+  #voting-resources-app .vra-card-image img { width: 100%; height: 100%; object-fit: cover; }
+  #voting-resources-app .vra-card-date {
+    padding: 0.625rem 0.75rem 0.5rem; border-bottom: 1px solid var(--border);
+    background: rgba(230, 234, 244, 0.4);
+  }
+  #voting-resources-app .vra-card-date p { font-size: 11px; color: var(--muted-foreground); margin: 0; line-height: 1; }
+  #voting-resources-app .vra-card-date .vra-label {
+    font-family: 'Libre Franklin', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  #voting-resources-app .vra-card-date .vra-value { font-weight: 500; color: var(--foreground); }
+
+  #voting-resources-app .vra-card-buttons { padding: 0.625rem; display: flex; flex-direction: column; gap: 0.375rem; }
+  #voting-resources-app .vra-btn-download {
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    background: var(--primary); color: var(--primary-foreground);
+    padding: 0.5rem 0.75rem; font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+    text-transform: uppercase; border: none; cursor: pointer;
+  }
+  #voting-resources-app .vra-btn-download:hover:not(:disabled) { background: rgba(28,65,110,0.9); }
+  #voting-resources-app .vra-btn-download:active:not(:disabled) { transform: scale(0.98); }
+  #voting-resources-app .vra-btn-download:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  #voting-resources-app .vra-copy-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.375rem; }
+  #voting-resources-app .vra-btn-copy {
+    display: flex; align-items: center; justify-content: center; gap: 0.375rem;
+    border: 1px solid var(--border); background: var(--card); color: var(--foreground);
+    padding: 0.375rem 0.5rem; font-size: 11px; font-weight: 500; cursor: pointer;
+  }
+  #voting-resources-app .vra-btn-copy:hover:not(:disabled) { background: var(--muted); }
+  #voting-resources-app .vra-btn-copy:active:not(:disabled) { transform: scale(0.98); }
+  #voting-resources-app .vra-btn-copy:disabled { opacity: 0.35; cursor: not-allowed; }
+  #voting-resources-app .vra-btn-copy.vra-span2 { grid-column: span 2 / span 2; }
+
+  /* Footer */
+  #voting-resources-app footer {
+    background: rgba(28, 65, 110, 0.05); border-top: 1px solid var(--border); margin-top: auto;
+  }
+  #voting-resources-app .vra-footer-inner { padding: 2rem 0 2.5rem; }
+  #voting-resources-app .vra-footer-grid {
+    display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 1.5rem;
+  }
+  @media (min-width: 768px) { #voting-resources-app .vra-footer-grid { grid-template-columns: repeat(3, 1fr); } }
+  #voting-resources-app .vra-footer-grid p.vra-footer-label {
+    font-family: 'Libre Franklin', sans-serif; font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted-foreground); margin: 0 0 0.5rem;
+  }
+  #voting-resources-app .vra-footer-grid p.vra-footer-body {
+    font-size: 0.75rem; color: var(--muted-foreground); line-height: 1.6; margin: 0;
+  }
+
+  /* Clipboard dialog */
+  #voting-resources-app .vra-dialog-overlay {
+    position: fixed; inset: 0; background: rgba(12,25,39,0.4);
+    display: none; align-items: center; justify-content: center; z-index: 50; padding: 0 1rem;
+  }
+  #voting-resources-app .vra-dialog-overlay.vra-open { display: flex; }
+  #voting-resources-app .vra-dialog-panel {
+    background: var(--card); border: 1px solid var(--border);
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+    padding: 1.75rem 2rem; max-width: 20rem; width: 100%;
+  }
+  #voting-resources-app .vra-dialog-row { display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 1.5rem; }
+  #voting-resources-app .vra-dialog-icon {
+    width: 2rem; height: 2rem; border-radius: 9999px; background: rgba(28,65,110,0.1);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--primary);
+  }
+  #voting-resources-app .vra-dialog-row p {
+    font-family: 'Libre Franklin', sans-serif; font-weight: 600; font-size: 1rem;
+    line-height: 1.3; margin: 0; color: var(--foreground);
+  }
+  #voting-resources-app .vra-dialog-ok {
+    width: 100%; background: var(--primary); color: var(--primary-foreground);
+    padding: 0.625rem; font-size: 0.875rem; font-weight: 600; letter-spacing: 0.02em;
+    text-transform: uppercase; border: none; cursor: pointer;
+  }
+  #voting-resources-app .vra-dialog-ok:hover { background: rgba(28,65,110,0.9); }
+  #voting-resources-app .vra-dialog-ok:active { transform: scale(0.98); }
+  </style>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600&display=swap">
+</head>
+<body style="margin:0;">
+
+<div id="voting-resources-app">
+
+  <header class="vra-header">
+    <div class="vra-container vra-header-inner">
+      <p class="vra-eyebrow">Civic Engagement Resources</p>
+      <h1>Voter Outreach<br class="vra-force-break"> Graphics Library</h1>
+      <p>Download print-ready and social-media graphics for your state, and copy pre-written
+        captions — short, long, or as a mini embed script — to make sharing effortless.
+        Select a state below to load its full library.</p>
+    </div>
+    <div class="vra-accent-bar"></div>
+  </header>
+
+  <div class="vra-selector-bar">
+    <div class="vra-container vra-selector-inner">
+      <label class="vra-selector-label" for="vra-state-select">Select state</label>
+      <select id="vra-state-select">
+        <option value="">— Choose a state —</option>
+      </select>
+      <span class="vra-count" id="vra-count"></span>
+    </div>
+  </div>
+
+  <main>
+    <div class="vra-container">
+      <div class="vra-empty" id="vra-empty">
+        <div class="vra-empty-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>
+        </div>
+        <p class="vra-empty-title">Select a state to get started</p>
+        <p class="vra-empty-sub">Use the dropdown above to load voting graphics and copy text for your state.</p>
+      </div>
+
+      <div id="vra-results" style="display:none;">
+        <div class="vra-section-header">
+          <h2 id="vra-state-name"></h2>
+          <span>12 graphics available</span>
+        </div>
+        <div class="vra-grid" id="vra-grid"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="vra-container vra-footer-inner">
+      <div class="vra-footer-grid">
+        <div>
+          <p class="vra-footer-label">Usage</p>
+          <p class="vra-footer-body">Check the "Use until" date on each graphic before sharing. Graphics may
+            reference specific registration deadlines — outdated graphics should not be circulated.</p>
+        </div>
+        <div>
+          <p class="vra-footer-label">Nonpartisan notice</p>
+          <p class="vra-footer-body">All resources are provided for nonpartisan civic engagement purposes only
+            and are designed to encourage voter registration and participation, without endorsement of any
+            candidate or party.</p>
+        </div>
+        <div>
+          <p class="vra-footer-label">Questions?</p>
+          <p class="vra-footer-body">Contact your state coordinator for questions about graphics, copy, or to
+            report an outdated asset. New graphics are added regularly as election dates approach.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <div class="vra-dialog-overlay" id="vra-dialog-overlay">
+    <div class="vra-dialog-panel">
+      <div class="vra-dialog-row">
+        <div class="vra-dialog-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </div>
+        <p>Copied to clipboard</p>
+      </div>
+      <button class="vra-dialog-ok" id="vra-dialog-ok">OK</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  // ---------------------------------------------------------------------
+  // Apps Script is the single source of truth for both the state list
+  // (from the Setup tab's "Allow" column) and each state's 12 graphics
+  // (from that state's own tab). This file only knows the deployed URL
+  // and a static display-name lookup; everything else is data-driven.
+  // ---------------------------------------------------------------------
+  var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzxAyZGrL7OKp_id2Ir2vy5Mw8yvZk7jywKxV3blpxPeKkf4gAhuL3k9ikevCqSKnH27A/exec";
+
+  // Static USPS code -> full name lookup, used only for display. This
+  // never changes and carries no maintenance burden, unlike "which
+  // states are live," which always comes from Apps Script/the Sheet.
+  var STATE_NAMES = {
+    AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California",
+    CO: "Colorado", CT: "Connecticut", DE: "Delaware", FL: "Florida", GA: "Georgia",
+    HI: "Hawaii", ID: "Idaho", IL: "Illinois", IN: "Indiana", IA: "Iowa",
+    KS: "Kansas", KY: "Kentucky", LA: "Louisiana", ME: "Maine", MD: "Maryland",
+    MA: "Massachusetts", MI: "Michigan", MN: "Minnesota", MS: "Mississippi", MO: "Missouri",
+    MT: "Montana", NE: "Nebraska", NV: "Nevada", NH: "New Hampshire", NJ: "New Jersey",
+    NM: "New Mexico", NY: "New York", NC: "North Carolina", ND: "North Dakota", OH: "Ohio",
+    OK: "Oklahoma", OR: "Oregon", PA: "Pennsylvania", RI: "Rhode Island", SC: "South Carolina",
+    SD: "South Dakota", TN: "Tennessee", TX: "Texas", UT: "Utah", VT: "Vermont",
+    VA: "Virginia", WA: "Washington", WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming",
+    DC: "District of Columbia"
+  };
+
+  function resourceAvailable(v) { return (v || "").trim() !== ""; }
+
+  function fetchAvailableStates() {
+    return fetch(APPS_SCRIPT_URL + "?action=states")
+      .then(function (res) { return res.json(); })
+      .then(function (data) { return data.states || []; });
+  }
+
+  function fetchStateGraphics(state) {
+    return fetch(APPS_SCRIPT_URL + "?state=" + encodeURIComponent(state))
+      .then(function (res) { return res.json(); });
+  }
+
+  async function downloadImage(url, filename) {
+    try {
+      var res = await fetch(url);
+      var blob = await res.blob();
+      var blobUrl = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = blobUrl; a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch (e) {
+      var a2 = document.createElement("a");
+      a2.href = url; a2.download = filename; a2.target = "_blank";
+      document.body.appendChild(a2); a2.click(); document.body.removeChild(a2);
+    }
+  }
+
+  async function copyToClipboard(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (e) {
+      var ta = document.createElement("textarea");
+      ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      document.execCommand("copy"); document.body.removeChild(ta);
+    }
+    openDialog();
+  }
+
+  function openDialog() { document.getElementById("vra-dialog-overlay").classList.add("vra-open"); }
+  function closeDialog() { document.getElementById("vra-dialog-overlay").classList.remove("vra-open"); }
+
+  var DOWNLOAD_ICON = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>';
+  var COPY_ICON = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
+    });
+  }
+
+  function renderGraphics(state, graphics) {
+    var stateName = STATE_NAMES[state] || state;
+    var grid = document.getElementById("vra-grid");
+    grid.innerHTML = "";
+
+    graphics.forEach(function (g) {
+      var card = document.createElement("div");
+      card.className = "vra-card";
+
+      var imgSrc = resourceAvailable(g.imageUrl) ? g.imageUrl : "https://placehold.co/480x480/EAEAE6/9CA3AF?text=";
+      var dlDisabled = !resourceAvailable(g.imageUrl);
+      var shortDisabled = !resourceAvailable(g.shortText);
+      var longDisabled = !resourceAvailable(g.longText);
+      var scriptDisabled = !resourceAvailable(g.miniScript);
+
+      card.innerHTML =
+        '<div class="vra-card-image"><img src="' + imgSrc + '" alt="Voting graphic ' + g.id + '" loading="lazy"></div>' +
+        '<div class="vra-card-date"><p><span class="vra-label">Use until</span> <span class="vra-value">' + escapeHtml(g.useUntil) + '</span></p></div>' +
+        '<div class="vra-card-buttons">' +
+          '<button class="vra-btn-download" ' + (dlDisabled ? "disabled" : "") + '>' + DOWNLOAD_ICON + ' Download graphic</button>' +
+          '<div class="vra-copy-row">' +
+            '<button class="vra-btn-copy" data-copy="short" ' + (shortDisabled ? "disabled" : "") + '>' + COPY_ICON + ' Short text</button>' +
+            '<button class="vra-btn-copy" data-copy="long" ' + (longDisabled ? "disabled" : "") + '>' + COPY_ICON + ' Long text</button>' +
+          '</div>' +
+          '<button class="vra-btn-copy vra-span2" data-copy="script" ' + (scriptDisabled ? "disabled" : "") + '>' + COPY_ICON + ' Copy mini-script</button>' +
+        '</div>';
+
+      var dlBtn = card.querySelector(".vra-btn-download");
+      dlBtn.addEventListener("click", function () {
+        if (!dlDisabled) downloadImage(g.imageUrl, g.filename);
+      });
+      card.querySelectorAll(".vra-btn-copy").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var kind = btn.getAttribute("data-copy");
+          var val = kind === "short" ? g.shortText : kind === "long" ? g.longText : g.miniScript;
+          if (resourceAvailable(val)) copyToClipboard(val);
+        });
+      });
+
+      grid.appendChild(card);
+    });
+
+    document.getElementById("vra-state-name").textContent = stateName;
+    document.getElementById("vra-count").textContent = graphics.length + " graphics · " + stateName;
+    document.getElementById("vra-count").classList.add("vra-visible");
+    document.getElementById("vra-empty").style.display = "none";
+    document.getElementById("vra-results").style.display = "";
+  }
+
+  function showGridMessage(text) {
+    document.getElementById("vra-grid").innerHTML =
+      '<p style="grid-column:1/-1;font-size:0.875rem;color:var(--muted-foreground);">' + escapeHtml(text) + '</p>';
+  }
+
+  function onStateChange(select) {
+    var state = select.value;
+    if (!state) {
+      document.getElementById("vra-results").style.display = "none";
+      document.getElementById("vra-empty").style.display = "";
+      document.getElementById("vra-count").classList.remove("vra-visible");
+      return;
+    }
+
+    document.getElementById("vra-empty").style.display = "none";
+    document.getElementById("vra-results").style.display = "";
+    document.getElementById("vra-state-name").textContent = STATE_NAMES[state] || state;
+    document.getElementById("vra-count").classList.remove("vra-visible");
+    showGridMessage("Loading graphics…");
+
+    fetchStateGraphics(state).then(function (data) {
+      if (data.error) { showGridMessage(data.error); return; }
+      renderGraphics(state, data.graphics || []);
+    }).catch(function () {
+      showGridMessage("Something went wrong loading this state. Please try again.");
+    });
+  }
+
+  function init() {
+    var select = document.getElementById("vra-state-select");
+    var placeholder = select.querySelector("option");
+    placeholder.textContent = "Loading states…";
+
+    fetchAvailableStates().then(function (codes) {
+      placeholder.textContent = "— Choose a state —";
+      codes.forEach(function (code) {
+        var opt = document.createElement("option");
+        opt.value = code;
+        opt.textContent = (STATE_NAMES[code] || code) + " (" + code + ")";
+        select.appendChild(opt);
+      });
+    }).catch(function () {
+      placeholder.textContent = "Unable to load states — please refresh";
+    });
+
+    select.addEventListener("change", function () { onStateChange(select); });
+
+    document.getElementById("vra-dialog-ok").addEventListener("click", closeDialog);
+    document.getElementById("vra-dialog-overlay").addEventListener("click", function (e) {
+      if (e.target === e.currentTarget) closeDialog();
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

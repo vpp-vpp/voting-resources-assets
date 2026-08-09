@@ -200,16 +200,20 @@
   #voting-resources-app .vra-dialog-panel {
     background: var(--card); border: 1px solid var(--border);
     box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-    padding: 1.75rem 2rem; max-width: 20rem; width: 100%;
+    padding: 1.75rem 2rem; max-width: 28rem; width: 100%;
+    max-height: 80vh; overflow-y: auto;
   }
-  #voting-resources-app .vra-dialog-row { display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 1.5rem; }
-  #voting-resources-app .vra-dialog-icon {
-    width: 2rem; height: 2rem; border-radius: 9999px; background: rgba(28,65,110,0.1);
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--primary);
+  #voting-resources-app .vra-dialog-title {
+    font-family: 'Libre Franklin', sans-serif; font-weight: 700; font-size: 1.0625rem;
+    line-height: 1.3; margin: 0 0 0.75rem; color: var(--foreground);
   }
-  #voting-resources-app .vra-dialog-row p {
-    font-family: 'Libre Franklin', sans-serif; font-weight: 600; font-size: 1rem;
-    line-height: 1.3; margin: 0; color: var(--foreground);
+  #voting-resources-app .vra-dialog-text {
+    font-size: 0.875rem; line-height: 1.6; color: var(--foreground);
+    white-space: pre-wrap; background: var(--muted); border: 1px solid var(--border);
+    padding: 0.75rem 1rem; margin: 0 0 1rem; max-height: 40vh; overflow-y: auto;
+  }
+  #voting-resources-app .vra-dialog-confirm {
+    font-size: 0.8125rem; color: var(--muted-foreground); margin: 0 0 1.5rem;
   }
   #voting-resources-app .vra-dialog-ok {
     width: 100%; background: var(--primary); color: var(--primary-foreground);
@@ -294,15 +298,9 @@
 
   <div class="vra-dialog-overlay" id="vra-dialog-overlay">
     <div class="vra-dialog-panel">
-      <div class="vra-dialog-row">
-        <div class="vra-dialog-icon">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-        </div>
-        <p>Copied to clipboard</p>
-      </div>
+      <h3 class="vra-dialog-title" id="vra-dialog-title"></h3>
+      <div class="vra-dialog-text" id="vra-dialog-text"></div>
+      <p class="vra-dialog-confirm">has been copied to your clipboard.</p>
       <button class="vra-dialog-ok" id="vra-dialog-ok">OK</button>
     </div>
   </div>
@@ -365,7 +363,7 @@
     }
   }
 
-  async function copyToClipboard(text) {
+  async function copyToClipboard(title, text) {
     try {
       await navigator.clipboard.writeText(text);
     } catch (e) {
@@ -374,6 +372,8 @@
       document.body.appendChild(ta); ta.focus(); ta.select();
       document.execCommand("copy"); document.body.removeChild(ta);
     }
+    document.getElementById("vra-dialog-title").textContent = title;
+    document.getElementById("vra-dialog-text").textContent = text;
     openDialog();
   }
 
@@ -413,7 +413,7 @@
             '<button class="vra-btn-copy" data-copy="short" ' + (shortDisabled ? "disabled" : "") + '>' + COPY_ICON + ' Short text</button>' +
             '<button class="vra-btn-copy" data-copy="long" ' + (longDisabled ? "disabled" : "") + '>' + COPY_ICON + ' Long text</button>' +
           '</div>' +
-          '<button class="vra-btn-copy vra-span2" data-copy="script" ' + (scriptDisabled ? "disabled" : "") + '>' + COPY_ICON + ' Copy mini-script</button>' +
+          '<button class="vra-btn-copy vra-span2" data-copy="script" ' + (scriptDisabled ? "disabled" : "") + '>' + COPY_ICON + ' Mini-script</button>' +
         '</div>';
 
       var dlBtn = card.querySelector(".vra-btn-download");
@@ -423,8 +423,9 @@
       card.querySelectorAll(".vra-btn-copy").forEach(function (btn) {
         btn.addEventListener("click", function () {
           var kind = btn.getAttribute("data-copy");
+          var title = kind === "short" ? "Short text" : kind === "long" ? "Long text" : "Mini-script";
           var val = kind === "short" ? g.shortText : kind === "long" ? g.longText : g.miniScript;
-          if (resourceAvailable(val)) copyToClipboard(val);
+          if (resourceAvailable(val)) copyToClipboard(title, val);
         });
       });
 

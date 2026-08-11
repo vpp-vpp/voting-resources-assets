@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" type="image/png" href="favicon.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Voter Outreach Graphics Library</title>
@@ -261,7 +260,7 @@
       <div id="vra-results" style="display:none;">
         <div class="vra-section-header">
           <h2 id="vra-state-name"></h2>
-          <span>12 graphics available</span>
+          <span id="vra-graphics-count"></span>
         </div>
         <div class="vra-grid" id="vra-grid"></div>
       </div>
@@ -273,7 +272,7 @@
       <div class="vra-footer-grid">
         <div>
           <p class="vra-footer-label">Usage</p>
-          <p class="vra-footer-body">Check the Use date(s) on each graphic before sharing, and only use/post 
+          <p class="vra-footer-body">Check the Use date(s) on each graphic before sharing, and only use/post
             during the stated date range. Graphics may reference specific deadlines — outdated graphics should not be circulated.</p>
         </div>
       </div>
@@ -417,6 +416,7 @@
     });
 
     document.getElementById("vra-state-name").textContent = stateName;
+    document.getElementById("vra-graphics-count").textContent = graphics.length + " graphic" + (graphics.length === 1 ? "" : "s") + " available";
     document.getElementById("vra-count").textContent = graphics.length + " graphics · " + stateName;
     document.getElementById("vra-count").classList.add("vra-visible");
     document.getElementById("vra-empty").style.display = "none";
@@ -424,6 +424,7 @@
   }
 
   function showGridMessage(text) {
+    document.getElementById("vra-graphics-count").textContent = "";
     document.getElementById("vra-grid").innerHTML =
       '<p style="grid-column:1/-1;font-size:0.875rem;color:var(--muted-foreground);">' + escapeHtml(text) + '</p>';
   }

@@ -327,15 +327,78 @@
 
   function resourceAvailable(v) { return (v || "").trim() !== ""; }
 
+  // ---------------------------------------------------------------------
+  // Apps Script Web Apps (deployed "Execute as: Me", "Anyone" access) have
+  // unpredictable latency -- Google gives no SLA for this tier, and every
+  // visitor's request shares the owner account's execution quota. That
+  // shows up as either an occasional outright failure or, worse, a request
+  // that just hangs for tens of seconds. Two mitigations below:
+  //   1. fetchJsonWithRetry -- times out a slow attempt (rather than
+  //      waiting indefinitely) and retries with backoff before giving up.
+  //   2. sessionStorage caching -- once a visitor successfully loads the
+  //      state list or a given state's graphics, re-loading the page or
+  //      switching back to a state they already viewed (within the same
+  //      browser tab) is instant and never hits Apps Script again until
+  //      CLIENT_CACHE_MS expires.
+  // ---------------------------------------------------------------------
+  var CLIENT_CACHE_MS = 5 * 60 * 1000; // 5 min -- comfortably under the server's own 6h cache
+
+  function readClientCache(key) {
+    try {
+      var raw = sessionStorage.getItem(key);
+      if (!raw) return null;
+      var parsed = JSON.parse(raw);
+      if (Date.now() - parsed.t > CLIENT_CACHE_MS) return null;
+      return parsed.v;
+    } catch (e) { return null; }
+  }
+
+  function writeClientCache(key, value) {
+    try { sessionStorage.setItem(key, JSON.stringify({ t: Date.now(), v: value })); }
+    catch (e) { /* storage full or unavailable -- fine to just skip caching */ }
+  }
+
+  function fetchWithTimeout(url, timeoutMs) {
+    var controller = new AbortController();
+    var timer = setTimeout(function () { controller.abort(); }, timeoutMs);
+    return fetch(url, { signal: controller.signal }).finally(function () { clearTimeout(timer); });
+  }
+
+  function fetchJsonWithRetry(url, attemptsLeft, delayMs) {
+    attemptsLeft = attemptsLeft || 3;
+    delayMs = delayMs || 1500;
+    return fetchWithTimeout(url, 12000)
+      .then(function (res) {
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        return res.json();
+      })
+      .catch(function (err) {
+        if (attemptsLeft <= 1) throw err;
+        return new Promise(function (resolve) { setTimeout(resolve, delayMs); })
+          .then(function () { return fetchJsonWithRetry(url, attemptsLeft - 1, delayMs * 2); });
+      });
+  }
+
   function fetchAvailableStates() {
-    return fetch(APPS_SCRIPT_URL + "?action=states")
-      .then(function (res) { return res.json(); })
-      .then(function (data) { return data.states || []; });
+    var cached = readClientCache("vra_states");
+    if (cached) return Promise.resolve(cached);
+
+    return fetchJsonWithRetry(APPS_SCRIPT_URL + "?action=states").then(function (data) {
+      var states = data.states || [];
+      writeClientCache("vra_states", states);
+      return states;
+    });
   }
 
   function fetchStateGraphics(state) {
-    return fetch(APPS_SCRIPT_URL + "?state=" + encodeURIComponent(state))
-      .then(function (res) { return res.json(); });
+    var cacheKey = "vra_graphics_" + state;
+    var cached = readClientCache(cacheKey);
+    if (cached) return Promise.resolve(cached);
+
+    return fetchJsonWithRetry(APPS_SCRIPT_URL + "?state=" + encodeURIComponent(state)).then(function (data) {
+      if (!data.error) writeClientCache(cacheKey, data); // don't cache error responses
+      return data;
+    });
   }
 
   async function downloadImage(url, filename) {

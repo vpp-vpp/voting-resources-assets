@@ -374,7 +374,11 @@
       })
       .catch(function (err) {
         if (attemptsLeft <= 1) throw err;
-        return new Promise(function (resolve) { setTimeout(resolve, delayMs); })
+        // Jitter (0.5x-1.5x of delayMs) so many visitors whose requests
+        // fail around the same moment don't all retry in lockstep and
+        // create a synchronized second wave of load.
+        var jittered = delayMs * (0.5 + Math.random());
+        return new Promise(function (resolve) { setTimeout(resolve, jittered); })
           .then(function () { return fetchJsonWithRetry(url, attemptsLeft - 1, delayMs * 2); });
       });
   }

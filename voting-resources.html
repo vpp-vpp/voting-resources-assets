@@ -61,8 +61,14 @@
   #voting-resources-app .vra-header { background: var(--primary); color: var(--primary-foreground); }
   #voting-resources-app .vra-header-inner { padding: 2.5rem 0; }
   @media (min-width: 768px) { #voting-resources-app .vra-header-inner { padding: 3.5rem 0; } }
+  #voting-resources-app .vra-logo-link { display: inline-block; }
   #voting-resources-app .vra-logo {
-    height: 28px; width: auto; margin: 0 0 1rem;
+    /* Left margin (1rem) added on top of the container's own left padding
+       (1.5rem mobile / 2.5rem desktop) so the logo sits as far from the
+       left edge of the page as it does from the top -- the header-inner's
+       top padding is exactly 1rem more than the container's left padding
+       at both breakpoints (2.5rem vs 1.5rem, then 3.5rem vs 2.5rem). */
+    height: 28px; width: auto; margin: 0 0 1rem 1rem;
   }
   @media (min-width: 768px) { #voting-resources-app .vra-logo { height: 34px; } }
   @media (min-width: 1024px) { #voting-resources-app .vra-logo { height: 40px; } }
@@ -79,7 +85,10 @@
   @media (min-width: 768px) { #voting-resources-app h1 { font-size: 2rem; } }
   @media (min-width: 1024px) { #voting-resources-app h1 { font-size: 2.5rem; } }
   #voting-resources-app .vra-header p {
-    color: rgba(255,255,255,0.75); max-width: 42rem; line-height: 1.6;
+    /* No max-width here -- text fills the container's full width, so the
+       right-side whitespace matches the container's own (symmetric)
+       padding instead of leaving an oversized gap on the right. */
+    color: rgba(255,255,255,0.75); line-height: 1.6;
     font-size: 0.875rem; margin: 0 0 0.75rem;
   }
   #voting-resources-app .vra-header p:last-child { margin-bottom: 0; }
@@ -242,15 +251,17 @@
 
   <header class="vra-header">
     <div class="vra-container vra-header-inner">
-      <img src="vopro-logo-white.png" alt="VoPro Pros — No Vote Left Behind" class="vra-logo">
+      <a href="https://www.vopropros.com" class="vra-logo-link">
+        <img src="vopro-logo-white.png" alt="VoPro Pros — No Vote Left Behind" class="vra-logo">
+      </a>
       <p class="vra-eyebrow">2026 Midterms General Election</p>
       <h1>State-Specific Voter Protection Toolkits</h1>
-      <p>Getting out the vote isn't enough — voters need to know what actions to take  — and when — to
+      <p>Getting out the vote isn't enough — voters need to know what actions to take — and when — to
         make sure their vote will count. These toolkits make it simple.</p>
-      <p>Select your state below for a toolkit with the right deadlines, URLs, and election rules for your 
+      <p>Select your state below for a toolkit with the right deadlines, URLs, and election rules for your
         state, then download graphics, add our pre-written captions (long text or short
         text), and personalize with your own hashtags. Use the graphics and text to
-        create or enhance social media messages, web pages, literature, door knockers, and more. 
+        create or enhance social media messages, web pages, literature, door knockers, and more.
         Canvassing or phone banking? Drop our mini-scripts right into your existing scripts.</p>
       <p>Check the Use date(s) on each graphic and only use/post during the stated date range.</p>
     </div>

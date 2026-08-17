@@ -58,18 +58,17 @@
   }
 
   /* Header */
-  #voting-resources-app .vra-header { background: var(--primary); color: var(--primary-foreground); }
+  #voting-resources-app .vra-header { background: var(--primary); color: var(--primary-foreground); position: relative; }
   #voting-resources-app .vra-header-inner { padding: 2.5rem 0; }
   @media (min-width: 768px) { #voting-resources-app .vra-header-inner { padding: 3.5rem 0; } }
-  #voting-resources-app .vra-logo-link { display: inline-block; }
-  #voting-resources-app .vra-logo {
-    /* Negative top margin pulls the logo up so its distance from the top
-       matches the container's left padding, instead of pushing it inward
-       from the left. header-inner's top padding is exactly 1rem more than
-       the container's left padding at both breakpoints (2.5rem vs 1.5rem,
-       then 3.5rem vs 2.5rem), so -1rem lines them up at both sizes. */
-    height: 28px; width: auto; margin: -1rem 0 1rem;
+  #voting-resources-app .vra-logo-link {
+    /* Positioned relative to .vra-header itself (full page width, no
+       container padding) rather than flowing inside the padded text
+       column -- so it sits near the true left edge of the page, with
+       top and left offsets equal to each other by construction. */
+    position: absolute; top: 0.75rem; left: 0.75rem; display: inline-block;
   }
+  #voting-resources-app .vra-logo { height: 28px; width: auto; display: block; }
   @media (min-width: 768px) { #voting-resources-app .vra-logo { height: 34px; } }
   @media (min-width: 1024px) { #voting-resources-app .vra-logo { height: 40px; } }
   #voting-resources-app .vra-eyebrow {

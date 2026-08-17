@@ -7,9 +7,10 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-  
+
     gtag('config', 'G-7GTGDGW4ER');
-  </script>  <meta charset="UTF-8">
+  </script>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Voter Outreach Graphics Library</title>
   <meta name="description" content="Download print-ready and social-media voting graphics for your state, and copy pre-written captions.">
@@ -60,6 +61,11 @@
   #voting-resources-app .vra-header { background: var(--primary); color: var(--primary-foreground); }
   #voting-resources-app .vra-header-inner { padding: 2.5rem 0; }
   @media (min-width: 768px) { #voting-resources-app .vra-header-inner { padding: 3.5rem 0; } }
+  #voting-resources-app .vra-logo {
+    height: 28px; width: auto; margin: 0 0 1rem;
+  }
+  @media (min-width: 768px) { #voting-resources-app .vra-logo { height: 34px; } }
+  @media (min-width: 1024px) { #voting-resources-app .vra-logo { height: 40px; } }
   #voting-resources-app .vra-eyebrow {
     font-family: 'Libre Franklin', sans-serif;
     font-size: 10px; font-weight: 600; text-transform: uppercase;
@@ -236,6 +242,7 @@
 
   <header class="vra-header">
     <div class="vra-container vra-header-inner">
+      <img src="vopro-logo-white.png" alt="VoPro Pros — No Vote Left Behind" class="vra-logo">
       <p class="vra-eyebrow">2026 Midterms General Election</p>
       <h1>State-Specific Voter Protection Toolkits</h1>
       <p>Getting out the vote isn't enough — voters need to know what actions to take to

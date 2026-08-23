@@ -74,8 +74,16 @@
   #voting-resources-app .vra-eyebrow {
     font-family: 'Libre Franklin', sans-serif;
     font-size: 10px; font-weight: 600; text-transform: uppercase;
-    letter-spacing: 0.2em; color: rgba(255,255,255,0.5); margin: 0 0 0.75rem;
+    letter-spacing: 0.2em; color: rgba(255,255,255,0.5);
+    /* Top margin clears the absolutely positioned logo above -- since the
+       logo no longer occupies flow space, this is the only thing keeping
+       it from crowding the eyebrow text. Values tuned per breakpoint
+       because the logo's own height (and thus how much of the header's
+       top padding it already eats into) changes at each one. */
+    margin: 1rem 0 0.75rem;
   }
+  @media (min-width: 768px) { #voting-resources-app .vra-eyebrow { margin-top: 0.5rem; } }
+  @media (min-width: 1024px) { #voting-resources-app .vra-eyebrow { margin-top: 0.75rem; } }
   #voting-resources-app h1 {
     font-family: 'Libre Franklin', sans-serif;
     font-size: 1.375rem; font-weight: 700; letter-spacing: -0.02em;
@@ -202,6 +210,7 @@
   #voting-resources-app .vra-footer-grid {
     display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 1.5rem;
   }
+  @media (min-width: 768px) { #voting-resources-app .vra-footer-grid { grid-template-columns: 1fr 1fr; } }
   #voting-resources-app .vra-footer-grid p.vra-footer-label {
     font-family: 'Libre Franklin', sans-serif; font-size: 10px; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted-foreground); margin: 0 0 0.5rem;
@@ -209,6 +218,10 @@
   #voting-resources-app .vra-footer-grid p.vra-footer-body {
     font-size: 0.75rem; color: var(--muted-foreground); line-height: 1.6; margin: 0;
   }
+  #voting-resources-app .vra-footer-grid p.vra-footer-body a {
+    color: var(--primary); text-decoration: underline;
+  }
+  #voting-resources-app .vra-footer-grid p.vra-footer-body a:hover { color: var(--accent); }
 
   /* Clipboard dialog */
   #voting-resources-app .vra-dialog-overlay {
@@ -307,6 +320,11 @@
           <p class="vra-footer-label">Usage</p>
           <p class="vra-footer-body">Check the Use date(s) on each graphic before sharing, and only use/post
             during the stated date range. Graphics may reference specific deadlines — outdated graphics should not be circulated.</p>
+        </div>
+        <div>
+          <p class="vra-footer-label">ERRORS?</p>
+          <p class="vra-footer-body">Please let us know if you see any errors by filling out
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLScZU74e63dMUouDYGnUC_X289rjS0_ZZh-OZE99NxGoBN-j3g/viewform" target="_blank" rel="noopener">this form</a>.</p>
         </div>
       </div>
     </div>

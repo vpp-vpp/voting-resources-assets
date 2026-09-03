@@ -370,6 +370,13 @@
 
   function resourceAvailable(v) { return (v || "").trim() !== ""; }
 
+  // Flip to true (and reload) to see request/retry/cache timing in the
+  // browser console. Left false for normal/production use.
+  const DEBUG = false;
+  function debugLog() {
+    if (DEBUG) console.log.apply(console, arguments);
+  }
+
   // ---------------------------------------------------------------------
   // Apps Script Web Apps (deployed "Execute as: Me", "Anyone" access) have
   // unpredictable latency -- Google gives no SLA for this tier, and every
@@ -407,28 +414,68 @@
     return fetch(url, { signal: controller.signal }).finally(function () { clearTimeout(timer); });
   }
 
-  function fetchJsonWithRetry(url, attemptsLeft, delayMs) {
+  function fetchJsonWithRetry(url, attemptsLeft, delayMs, attemptNumber) {
     attemptsLeft = attemptsLeft || 3;
     delayMs = delayMs || 1500;
+    attemptNumber = attemptNumber || 1;
+    var startTime = Date.now();
+    debugLog("fetchJson attempt " + attemptNumber + " started:", url);
     return fetchWithTimeout(url, 12000)
       .then(function (res) {
+        var elapsed = Date.now() - startTime;
+        debugLog(
+          "fetchJson attempt " + attemptNumber +
+          " HTTP response:",
+          res.status,
+          res.statusText,
+          "elapsed:",
+          elapsed + " ms"
+        );
         if (!res.ok) throw new Error("HTTP " + res.status);
         return res.json();
       })
+      .then(function (data) {
+        var elapsed = Date.now() - startTime;
+        debugLog(
+          "fetchJson attempt " + attemptNumber +
+          " succeeded; elapsed:",
+          elapsed + " ms"
+        );
+        return data;
+      })
       .catch(function (err) {
+        var elapsed = Date.now() - startTime;
+        debugLog(
+          "fetchJson attempt " + attemptNumber +
+          " failed; elapsed:",
+          elapsed + " ms",
+          "error:",
+          err.name + ": " + err.message,
+          "timeout:",
+          err.name === "AbortError"
+        );
         if (attemptsLeft <= 1) throw err;
         // Jitter (0.5x-1.5x of delayMs) so many visitors whose requests
         // fail around the same moment don't all retry in lockstep and
         // create a synchronized second wave of load.
         var jittered = delayMs * (0.5 + Math.random());
+        debugLog(
+          "Waiting " + Math.round(jittered) +
+          " ms before attempt " + (attemptNumber + 1)
+        );
         return new Promise(function (resolve) { setTimeout(resolve, jittered); })
-          .then(function () { return fetchJsonWithRetry(url, attemptsLeft - 1, delayMs * 2); });
+          .then(function () {
+            return fetchJsonWithRetry(url, attemptsLeft - 1, delayMs * 2, attemptNumber + 1);
+          });
       });
   }
 
   function fetchAvailableStates() {
     var cached = readClientCache("vra_states");
-    if (cached) return Promise.resolve(cached);
+    if (cached) {
+      debugLog("served from client cache: vra_states");
+      return Promise.resolve(cached);
+    }
 
     return fetchJsonWithRetry(APPS_SCRIPT_URL + "?action=states").then(function (data) {
       var states = data.states || [];
@@ -440,7 +487,10 @@
   function fetchStateGraphics(state) {
     var cacheKey = "vra_graphics_" + state;
     var cached = readClientCache(cacheKey);
-    if (cached) return Promise.resolve(cached);
+    if (cached) {
+      debugLog("served from client cache:", cacheKey);
+      return Promise.resolve(cached);
+    }
 
     return fetchJsonWithRetry(APPS_SCRIPT_URL + "?state=" + encodeURIComponent(state)).then(function (data) {
       if (!data.error) writeClientCache(cacheKey, data); // don't cache error responses

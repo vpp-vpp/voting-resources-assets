@@ -372,9 +372,41 @@
 
   // Flip to true (and reload) to see request/retry/cache timing in the
   // browser console. Left false for normal/production use.
-  const DEBUG = true;
+  const DEBUG = false;
   function debugLog() {
     if (DEBUG) console.log.apply(console, arguments);
+  }
+
+  // ---------------------------------------------------------------------
+  // Lightweight remote diagnostic logging, separate from the console-only
+  // debugLog() above. Sends one event per session, plus events for actual
+  // retries/failures -- deliberately NOT every successful fetch, to keep
+  // volume minimal. Runs on a Cloudflare Worker, entirely independent of
+  // the Apps Script backend/quota this is meant to help diagnose. Fire-
+  // and-forget: never awaited, never retried, and any failure here is
+  // swallowed silently so logging itself can never break the app.
+  // ---------------------------------------------------------------------
+  var LOG_ENDPOINT = "https://voting-resources-logger.eratajak2.workers.dev/";
+  var SESSION_ID = (window.crypto && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : (Date.now().toString(36) + Math.random().toString(36).slice(2));
+
+  function logEvent(name, fields) {
+    try {
+      var payload = Object.assign({
+        event: name,
+        sessionId: SESSION_ID,
+        ts: new Date().toISOString(),
+        ua: navigator.userAgent,
+        screen: (screen.width || "?") + "x" + (screen.height || "?")
+      }, fields || {});
+      var body = JSON.stringify(payload);
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(LOG_ENDPOINT, body);
+      } else {
+        fetch(LOG_ENDPOINT, { method: "POST", body: body, keepalive: true }).catch(function () {});
+      }
+    } catch (e) { /* logging must never break the app */ }
   }
 
   // ---------------------------------------------------------------------
@@ -414,7 +446,7 @@
     return fetch(url, { signal: controller.signal }).finally(function () { clearTimeout(timer); });
   }
 
-  function fetchJsonWithRetry(url, attemptsLeft, delayMs, attemptNumber) {
+  function fetchJsonWithRetry(url, kind, attemptsLeft, delayMs, attemptNumber) {
     attemptsLeft = attemptsLeft || 3;
     delayMs = delayMs || 1500;
     attemptNumber = attemptNumber || 1;
@@ -441,6 +473,11 @@
           " succeeded; elapsed:",
           elapsed + " ms"
         );
+        // Only log remotely if a retry was actually needed -- a normal
+        // first-try success is the common case and not worth the volume.
+        if (attemptNumber > 1) {
+          logEvent("request_succeeded_after_retry", { kind: kind, attempt: attemptNumber, elapsedMs: elapsed });
+        }
         return data;
       })
       .catch(function (err) {
@@ -454,6 +491,14 @@
           "timeout:",
           err.name === "AbortError"
         );
+        logEvent("request_failed", {
+          kind: kind,
+          attempt: attemptNumber,
+          elapsedMs: elapsed,
+          errorType: err.name,
+          errorMessage: err.message,
+          willRetry: attemptsLeft > 1
+        });
         if (attemptsLeft <= 1) throw err;
         // Jitter (0.5x-1.5x of delayMs) so many visitors whose requests
         // fail around the same moment don't all retry in lockstep and
@@ -465,7 +510,7 @@
         );
         return new Promise(function (resolve) { setTimeout(resolve, jittered); })
           .then(function () {
-            return fetchJsonWithRetry(url, attemptsLeft - 1, delayMs * 2, attemptNumber + 1);
+            return fetchJsonWithRetry(url, kind, attemptsLeft - 1, delayMs * 2, attemptNumber + 1);
           });
       });
   }
@@ -477,7 +522,7 @@
       return Promise.resolve(cached);
     }
 
-    return fetchJsonWithRetry(APPS_SCRIPT_URL + "?action=states").then(function (data) {
+    return fetchJsonWithRetry(APPS_SCRIPT_URL + "?action=states", "states").then(function (data) {
       var states = data.states || [];
       writeClientCache("vra_states", states);
       return states;
@@ -492,7 +537,7 @@
       return Promise.resolve(cached);
     }
 
-    return fetchJsonWithRetry(APPS_SCRIPT_URL + "?state=" + encodeURIComponent(state)).then(function (data) {
+    return fetchJsonWithRetry(APPS_SCRIPT_URL + "?state=" + encodeURIComponent(state), "graphics:" + state).then(function (data) {
       if (!data.error) writeClientCache(cacheKey, data); // don't cache error responses
       return data;
     });
@@ -617,10 +662,13 @@
       renderGraphics(state, data.graphics || []);
     }).catch(function () {
       showGridMessage("Something went wrong loading this state. Please try again.");
+      logEvent("graphics_load_failed_completely", { state: state });
     });
   }
 
   function init() {
+    logEvent("session_start");
+
     var select = document.getElementById("vra-state-select");
     var placeholder = select.querySelector("option");
     placeholder.textContent = "Loading states…";
@@ -635,6 +683,7 @@
       });
     }).catch(function () {
       placeholder.textContent = "Unable to load states — please refresh";
+      logEvent("states_load_failed_completely");
     });
 
     select.addEventListener("change", function () { onStateChange(select); });

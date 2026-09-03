@@ -530,6 +530,11 @@
   }
 
   function fetchStateGraphics(state) {
+    // Unlike fetchJsonWithRetry's own logging (which only fires on
+    // failure/retry to keep volume down), this fires on every access --
+    // cached or freshly fetched, success or failure -- so you get a real
+    // per-state request count to look at, not just error cases.
+    logEvent("graphics_requested", { state: state });
     var cacheKey = "vra_graphics_" + state;
     var cached = readClientCache(cacheKey);
     if (cached) {
@@ -660,6 +665,12 @@
     fetchStateGraphics(state).then(function (data) {
       if (data.error) { showGridMessage(data.error); return; }
       renderGraphics(state, data.graphics || []);
+      // GA4 custom event -- the page never changes URL when a state is
+      // selected, so without this, GA4 has no way to know which state
+      // (if any) a visitor looked at, only that the page loaded at all.
+      if (typeof gtag === "function") {
+        gtag("event", "state_selected", { state: state, state_name: STATE_NAMES[state] || state });
+      }
     }).catch(function () {
       showGridMessage("Something went wrong loading this state. Please try again.");
       logEvent("graphics_load_failed_completely", { state: state });

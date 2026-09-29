@@ -215,6 +215,13 @@
     font-family: 'Libre Franklin', sans-serif; font-size: 10px; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted-foreground); margin: 0 0 0.5rem;
   }
+  /* Separates a second label/body pair stacked within the same footer
+     column (e.g. COMMENTS? below ERRORS?) from the one above it -- same
+     spacing as the grid's own column gap, so it reads as a distinct
+     section without introducing a new spacing value. */
+  #voting-resources-app .vra-footer-grid p.vra-footer-label.vra-footer-section-spacer {
+    margin-top: 1.5rem;
+  }
   #voting-resources-app .vra-footer-grid p.vra-footer-body {
     font-size: 0.75rem; color: var(--muted-foreground); line-height: 1.6; margin: 0;
   }
@@ -276,7 +283,6 @@
         create or enhance social media messages, web pages, literature, door knockers, and more.
         Canvassing or phone banking? Drop our mini-scripts right into your existing scripts.</p>
       <p>Check the Use date(s) on each graphic and only use/post during the stated date range.</p>
-      <p>Trouble loading? That means lots of people are using this great resource. Please wait a bit and reload the page.</p>
     </div>
     <div class="vra-accent-bar"></div>
   </header>
@@ -326,6 +332,9 @@
           <p class="vra-footer-label">ERRORS?</p>
           <p class="vra-footer-body">Please let us know if you see any errors by filling out
             <a href="https://docs.google.com/forms/d/e/1FAIpQLScZU74e63dMUouDYGnUC_X289rjS0_ZZh-OZE99NxGoBN-j3g/viewform" target="_blank" rel="noopener">this form</a>.</p>
+          <p class="vra-footer-label vra-footer-section-spacer">COMMENTS?</p>
+          <p class="vra-footer-body">We'd love to hear from you. Please use
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSetmvr7ydxkrbj97I3jnM0JI8ilLy2QSMotJbdmf0ME1HQ1Gw/viewform?usp=dialog" target="_blank" rel="noopener">this form</a>.</p>
         </div>
       </div>
     </div>
